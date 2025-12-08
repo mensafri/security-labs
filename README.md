@@ -98,6 +98,16 @@ Di sesi ini, kita akan mengeksploitasi kode yang tidak aman.
   - **Payload:** `http://localhost:3306`
   - **Hasil:** Jika muncul pesan error aneh (seperti versi MySQL `8.0.xx`), berarti port tersebut terbuka.
 
+- **Percobaan C: Membaca Source Code (PHP Wrapper)**
+  Kita akan mencoba membaca file `db.php` untuk mencuri password database.
+
+      * Payload: `php://filter/read=convert.base64-encode/resource=db.php`
+
+  > **Langkah:** \> 1. Submit payload di atas.
+  > 2\. Copy teks acak yang muncul (Base64).
+  > 3\. Decode teks tersebut di [Base64Decode.org](https://www.base64decode.org/).
+  > 4\. Anda akan melihat kode asli PHP termasuk kredensial database.
+
 ### 2. CSRF (Cross-Site Request Forgery)
 
 **File Target:** `profile.php`
