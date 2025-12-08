@@ -1,10 +1,3 @@
-Tentu, ini adalah file **README.md** yang sudah disesuaikan agar kompatibel untuk pengguna **Laragon** maupun **XAMPP**.
-
-Saya telah menambahkan instruksi spesifik untuk pengguna XAMPP (terkait folder `htdocs` dan URL `localhost`), serta instruksi penting untuk menyesuaikan file `attacker.html` agar serangan CSRF berhasil di kedua lingkungan tersebut.
-
-Silakan salin kode di bawah ini dan simpan sebagai `README.md`.
-
-````markdown
 # Modul Praktikum Keamanan Web: SSRF & CSRF
 
 Selamat datang di praktikum keamanan web. Repository ini berisi lingkungan simulasi kerentanan **SSRF (Server-Side Request Forgery)** dan **CSRF (Cross-Site Request Forgery)** menggunakan PHP Native.
@@ -22,6 +15,7 @@ security-labs/
 ├── ssrf.php        # Halaman target serangan SSRF (Image Fetcher)
 └── README.md       # Petunjuk Praktikum ini
 ```
+
 ````
 
 ---
@@ -197,3 +191,4 @@ Sebelum memulai, sesuaikan target serangan di file `attacker.html` agar cocok de
 - Implementasikan **CSRF Token** pada setiap form (`<input type="hidden" name="csrf_token" ...>`).
 - Gunakan cookie dengan flag `SameSite=Strict`.
 - Minta password ulang (Re-authentication) untuk aksi sensitif seperti ganti email/password.
+````
