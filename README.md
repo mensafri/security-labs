@@ -16,8 +16,6 @@ security-labs/
 └── README.md       # Petunjuk Praktikum ini
 ```
 
-````
-
 ---
 
 ## ⚙️ Instalasi & Persiapan Lingkungan
@@ -91,8 +89,6 @@ session_start();
 ?>
 ```
 
----
-
 ## 🛡️ Modul 1: SSRF (Server-Side Request Forgery)
 
 **Deskripsi:** Penyerang memanipulasi server untuk mengakses data internal atau melakukan scanning jaringan.
@@ -130,8 +126,6 @@ session_start();
     > 2\. Copy teks acak yang muncul (Base64).
     > 3\. Decode teks tersebut di [Base64Decode.org](https://www.base64decode.org/).
     > 4\. Anda akan melihat kode asli PHP termasuk kredensial database.
-
----
 
 ## 🔓 Modul 2: CSRF (Cross-Site Request Forgery)
 
@@ -176,8 +170,6 @@ Sebelum memulai, sesuaikan target serangan di file `attacker.html` agar cocok de
     - Refresh halaman.
     - **Hasil:** Email berubah menjadi `hacked_by_attacker@gmail.com` tanpa persetujuan Anda\!
 
----
-
 ## 📝 Kesimpulan & Perbaikan
 
 ### Cara Mencegah SSRF
@@ -191,4 +183,3 @@ Sebelum memulai, sesuaikan target serangan di file `attacker.html` agar cocok de
 - Implementasikan **CSRF Token** pada setiap form (`<input type="hidden" name="csrf_token" ...>`).
 - Gunakan cookie dengan flag `SameSite=Strict`.
 - Minta password ulang (Re-authentication) untuk aksi sensitif seperti ganti email/password.
-````
