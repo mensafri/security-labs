@@ -79,10 +79,10 @@ INSERT INTO users (username, password, email) VALUES
 
 Di sesi ini, kita akan mengeksploitasi kode yang tidak aman.
 
-### [cite_start]1. SSRF (Server-Side Request Forgery) [cite: 37]
+### 1. SSRF (Server-Side Request Forgery)
 
 **File Target:** `ssrf.php`
-[cite_start]**Konsep:** Memanipulasi server untuk mengakses file internal atau scanning port[cite: 8].
+**Konsep:** Memanipulasi server untuk mengakses file internal atau scanning port.
 
 - **Percobaan A: Local File Inclusion (LFI)**
 
@@ -96,13 +96,13 @@ Di sesi ini, kita akan mengeksploitasi kode yang tidak aman.
 
   - **Tujuan:** Mengecek apakah database MySQL aktif.
   - **Payload:** `http://localhost:3306`
-  - [cite_start]**Hasil:** Jika muncul pesan error aneh (seperti versi MySQL `8.0.xx`), berarti port tersebut terbuka[cite: 9].
+  - **Hasil:** Jika muncul pesan error aneh (seperti versi MySQL `8.0.xx`), berarti port tersebut terbuka.
 
-### [cite_start]2. CSRF (Cross-Site Request Forgery) [cite: 88]
+### 2. CSRF (Cross-Site Request Forgery)
 
 **File Target:** `profile.php`
 **File Penyerang:** `attacker.html`
-[cite_start]**Konsep:** Memaksa browser user mengirim request ganti email tanpa sepengetahuan user[cite: 89].
+**Konsep:** Memaksa browser user mengirim request ganti email tanpa sepengetahuan user.
 
 - **Persiapan:**
   Edit file `attacker.html`, sesuaikan baris `<form action="...">` dengan URL Anda:
@@ -124,7 +124,7 @@ Di sesi ini, kita akan mengeksploitasi kode yang tidak aman.
 
 Di sesi ini, kita akan menguji kode yang sudah diamankan.
 
-### [cite_start]1. Pengamanan SSRF (Whitelist & Protocol Check) [cite: 66, 68]
+### 1. Pengamanan SSRF (Whitelist & Protocol Check)
 
 **File Target:** `ssrf_secure.php`
 
@@ -138,7 +138,7 @@ Di sesi ini, kita akan menguji kode yang sudah diamankan.
   - Masukkan: `http://via.placeholder.com/150`
   - **Hasil:** Berhasil menampilkan gambar (karena domain ada di whitelist).
 
-### [cite_start]2. Pengamanan CSRF (CSRF Token) [cite: 124]
+### 2. Pengamanan CSRF (CSRF Token)
 
 **File Target:** `profile_secure.php`
 
@@ -160,10 +160,10 @@ Di sesi ini, kita akan menguji kode yang sudah diamankan.
 
 ## 📝 Perbandingan Kode
 
-| Fitur                   | Vulnerable                               | Secure                                                         |
-| :---------------------- | :--------------------------------------- | :------------------------------------------------------------- |
-| **SSRF: Validasi URL**  | Tidak ada (`file_get_contents` langsung) | [cite_start]Whitelist Domain & Cek Protokol HTTP/S [cite: 65]  |
-| **CSRF: Proteksi Form** | Tidak ada                                | [cite_start]Token Acak (`$_SESSION['csrf_token']`) [cite: 124] |
-| **CSRF: Verifikasi**    | Server menerima request apa saja         | Server menolak request tanpa token valid                       |
+| Fitur                   | Vulnerable                               | Secure                                   |
+| :---------------------- | :--------------------------------------- | :--------------------------------------- |
+| **SSRF: Validasi URL**  | Tidak ada (`file_get_contents` langsung) | Whitelist Domain & Cek Protokol HTTP/S   |
+| **CSRF: Proteksi Form** | Tidak ada                                | Token Acak (`$_SESSION['csrf_token']`)   |
+| **CSRF: Verifikasi**    | Server menerima request apa saja         | Server menolak request tanpa token valid |
 
 ---
