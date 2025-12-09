@@ -1,6 +1,8 @@
 # Modul Praktikum Keamanan Web: SSRF & CSRF (Attack & Defense)
 
-Selamat datang di praktikum keamanan web. Repository ini dirancang untuk mensimulasikan serangan dan pertahanan pada celah keamanan **SSRF** dan **CSRF** menggunakan PHP Native.
+Selamat datang di praktikum keamanan web. Repository ini dirancang untuk mensimulasikan serangan dan pertahanan pada celah keamanan **SSRF (Server-Side Request Forgery)** dan **CSRF (Cross-Site Request Forgery)** menggunakan PHP Native.
+
+Modul ini telah diperbarui dengan teknik serangan **Hybrid** (menggabungkan cURL dan PHP Streams) untuk simulasi yang lebih realistis.
 
 ## 📂 Struktur Project
 
@@ -8,12 +10,13 @@ Pastikan file-file berikut tersedia di dalam folder project Anda (`security-labs
 
 ```text
 security-labs/
+├── admin_internal.php  # [NEW] Halaman rahasia (Simulasi proteksi internal)
 ├── attacker.html       # Halaman jebakan (Simulasi website penyerang)
 ├── db.php              # Koneksi database
 ├── login.php           # Halaman login user
 ├── profile.php         # [VULNERABLE] Target CSRF (Tanpa perlindungan)
 ├── profile_secure.php  # [SECURE] Target CSRF (Dilengkapi CSRF Token)
-├── ssrf.php            # [VULNERABLE] Target SSRF (Tanpa validasi input)
+├── ssrf.php            # [VULNERABLE] Target SSRF (Hybrid: cURL + Streams)
 ├── ssrf_secure.php     # [SECURE] Target SSRF (Dilengkapi Whitelist Domain)
 └── README.md           # Petunjuk praktikum ini
 ```
@@ -79,54 +82,68 @@ INSERT INTO users (username, password, email) VALUES
 
 Di sesi ini, kita akan mengeksploitasi kode yang tidak aman.
 
-### 1. SSRF (Server-Side Request Forgery)
+### 1\. SSRF (Server-Side Request Forgery)
 
 **File Target:** `ssrf.php`
-**Konsep:** Memanipulasi server untuk mengakses file internal atau scanning port.
+**Deskripsi:** Tools ini menggunakan logika **Hybrid**. Jika URL adalah HTTP, server menggunakan `cURL`. Jika URL adalah non-HTTP, server menggunakan `file_get_contents`.
 
-- **Percobaan A: Local File Inclusion (LFI)**
+#### Skenario A: Port Scanning (Reconnaissance)
 
-  - **Tujuan:** Membaca file sistem server.
-  - **Payload:**
-    - Windows: `file:///C:/Windows/win.ini`
-    - Linux: `file:///etc/passwd`
-  - **Hasil:** Isi file konfigurasi sistem akan tampil di layar.
+Mendeteksi layanan internal yang tidak bisa diakses lewat browser biasa.
 
-- **Percobaan B: Port Scanning**
+- **Payload:** `http://localhost:3306`
+- **Hasil:** Server menampilkan respon mentah dari MySQL (contoh: teks aneh berisi `mysql_native_password` atau versi `MariaDB`).
+- **Analisis:** Ini membuktikan server web bisa dipaksa "mengobrol" dengan database internal.
 
-  - **Tujuan:** Mengecek apakah database MySQL aktif.
-  - **Payload:** `http://localhost:3306`
-  - **Hasil:** Jika muncul pesan error aneh (seperti versi MySQL `8.0.xx`), berarti port tersebut terbuka.
+#### Skenario B: Access Control Bypass (Admin Jebol)
 
-- **Percobaan C: Membaca Source Code (PHP Wrapper)**
-  Kita akan mencoba membaca file `db.php` untuk mencuri password database.
+Mencoba mengakses halaman rahasia `admin_internal.php` yang memblokir akses dari browser publik.
 
-      * Payload: `php://filter/read=convert.base64-encode/resource=db.php`
+1.  Coba akses langsung di browser: `http://security-labs.test/admin_internal.php`.
+    - **Hasil:** ⛔ ACCESS DENIED.
+2.  Gunakan SSRF untuk mengaksesnya:
+    - **Payload (Laragon):** `http://security-labs.test/admin_internal.php`
+    - **Payload (XAMPP):** `http://localhost/security-labs/admin_internal.php`
+    - **Hasil:** 🔓 WELCOME SUPER ADMIN. Server mengizinkan request karena berasal dari "localhost" (dirinya sendiri).
 
-  > **Langkah:** \> 1. Submit payload di atas.
-  > 2\. Copy teks acak yang muncul (Base64).
-  > 3\. Decode teks tersebut di [Base64Decode.org](https://www.base64decode.org/).
-  > 4\. Anda akan melihat kode asli PHP termasuk kredensial database.
+#### Skenario C: Source Code Disclosure (Credential Theft)
 
-### 2. CSRF (Cross-Site Request Forgery)
+Mencuri kode asli PHP (termasuk password database) menggunakan PHP Wrapper.
+
+- **Payload:** `php://filter/read=convert.base64-encode/resource=db.php`
+- **Hasil:** Muncul deretan huruf acak (Base64).
+- **Decode:** Copy teks tersebut -\> Buka [Base64Decode.org](https://www.base64decode.org/) -\> Paste & Decode.
+- **Analisis:** Anda sekarang bisa melihat username & password database secara plain text\!
+
+#### Skenario D: Local File Inclusion (LFI)
+
+Membaca file konfigurasi server.
+
+- **Payload:** `file:///C:/Windows/win.ini` (Windows) atau `file:///etc/passwd` (Linux).
+- **Hasil:** Isi file tampil di layar.
+
+---
+
+### 2\. CSRF (Cross-Site Request Forgery)
 
 **File Target:** `profile.php`
 **File Penyerang:** `attacker.html`
 **Konsep:** Memaksa browser user mengirim request ganti email tanpa sepengetahuan user.
 
-- **Persiapan:**
-  Edit file `attacker.html`, sesuaikan baris `<form action="...">` dengan URL Anda:
+#### Persiapan Serangan
 
-  - _Laragon:_ `http://security-labs.test/profile.php`
-  - _XAMPP:_ `http://localhost/security-labs/profile.php`
+Edit file `attacker.html`, sesuaikan baris `<form action="...">` dengan URL Anda:
 
-- **Langkah Serangan:**
+- _Laragon:_ `http://security-labs.test/profile.php`
+- _XAMPP:_ `http://localhost/security-labs/profile.php`
 
-  1.  Buka `login.php` -\> Login sebagai **admin** (Pass: `12345`).
-  2.  Pastikan email saat ini `admin@target.com`. **JANGAN LOGOUT**.
-  3.  Buka tab baru, jalankan `attacker.html`.
-  4.  Kembali ke tab profil admin dan refresh.
-  5.  **Hasil:** Email berubah menjadi `hacked_by_attacker@gmail.com`.
+#### Eksekusi
+
+1.  Buka `login.php` -\> Login sebagai **admin** (Pass: `12345`).
+2.  Pastikan email saat ini `admin@target.com`. **JANGAN LOGOUT**.
+3.  Buka tab baru, jalankan `attacker.html`.
+4.  Kembali ke tab profil admin dan refresh.
+5.  **Hasil:** Email berubah menjadi `hacked_by_attacker@gmail.com`.
 
 ---
 
@@ -134,7 +151,7 @@ Di sesi ini, kita akan mengeksploitasi kode yang tidak aman.
 
 Di sesi ini, kita akan menguji kode yang sudah diamankan.
 
-### 1. Pengamanan SSRF (Whitelist & Protocol Check)
+### 1\. Pengamanan SSRF (Whitelist & Protocol Check)
 
 **File Target:** `ssrf_secure.php`
 
@@ -148,32 +165,29 @@ Di sesi ini, kita akan menguji kode yang sudah diamankan.
   - Masukkan: `http://via.placeholder.com/150`
   - **Hasil:** Berhasil menampilkan gambar (karena domain ada di whitelist).
 
-### 2. Pengamanan CSRF (CSRF Token)
+### 2\. Pengamanan CSRF (CSRF Token)
 
 **File Target:** `profile_secure.php`
 
-- **Persiapan:**
+#### Persiapan
 
-  1.  Login kembali sebagai **admin**.
-  2.  Akses menu aman: `profile_secure.php`.
-  3.  Coba ganti email lewat form yang tersedia. **Berhasil** (karena token valid).
+1.  Login kembali sebagai **admin**.
+2.  Akses menu aman: `profile_secure.php`.
+3.  Coba ganti email lewat form yang tersedia. **Berhasil** (karena token valid).
 
-- **Uji Serangan:**
+#### Uji Serangan
 
-  1.  Edit `attacker.html` lagi. Ubah target action menjadi file secure:
-      - `.../profile_secure.php`
-  2.  Buka `attacker.html` di browser.
-  3.  **Hasil:** Gagal. Muncul pesan _"SERANGAN CSRF TERDETEKSI\!"_.
-  4.  **Analisis:** Serangan gagal karena `attacker.html` tidak memiliki `csrf_token` yang cocok dengan session user saat ini.
-
----
-
-## 📝 Perbandingan Kode
-
-| Fitur                   | Vulnerable                               | Secure                                   |
-| :---------------------- | :--------------------------------------- | :--------------------------------------- |
-| **SSRF: Validasi URL**  | Tidak ada (`file_get_contents` langsung) | Whitelist Domain & Cek Protokol HTTP/S   |
-| **CSRF: Proteksi Form** | Tidak ada                                | Token Acak (`$_SESSION['csrf_token']`)   |
-| **CSRF: Verifikasi**    | Server menerima request apa saja         | Server menolak request tanpa token valid |
+1.  Edit `attacker.html` lagi. Ubah target action menjadi file secure:
+    - `.../profile_secure.php`
+2.  Buka `attacker.html` di browser.
+3.  **Hasil:** Gagal. Muncul pesan _"SERANGAN CSRF TERDETEKSI\!"_.
+4.  **Analisis:** Serangan gagal karena `attacker.html` tidak memiliki `csrf_token` yang cocok dengan session user saat ini.
 
 ---
+
+## 📝 Ringkasan Teknis
+
+| Jenis Serangan | Mengapa Terjadi?                                                                            | Cara Mencegah (Mitigasi)                                                                          |
+| :------------- | :------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------ |
+| **SSRF**       | Server mempercayai input URL user mentah-mentah (baik via `curl` atau `file_get_contents`). | **Whitelist Domain** (Daftar putih domain yang boleh diakses) & Validasi Protokol (Hanya HTTP/S). |
+| **CSRF**       | Server tidak memverifikasi apakah request berasal dari form asli atau website orang lain.   | **CSRF Token** (Kode rahasia unik di setiap form) & SameSite Cookie Attribute.                    |
