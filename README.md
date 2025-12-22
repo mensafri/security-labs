@@ -1,193 +1,232 @@
-# Modul Praktikum Keamanan Web: SSRF & CSRF (Attack & Defense)
+# Modul Praktikum Keamanan Web: SSRF, CSRF & Broken Access Control
 
-Selamat datang di praktikum keamanan web. Repository ini dirancang untuk mensimulasikan serangan dan pertahanan pada celah keamanan **SSRF (Server-Side Request Forgery)** dan **CSRF (Cross-Site Request Forgery)** menggunakan PHP Native.
+Selamat datang di repository praktikum keamanan web. Modul ini dirancang untuk mensimulasikan serangan siber pada lingkungan PHP Native dan mempelajari cara memperbaikinya (_Secure Coding_).
 
-Modul ini telah diperbarui dengan teknik serangan **Hybrid** (menggabungkan cURL dan PHP Streams) untuk simulasi yang lebih realistis.
+**Materi Praktikum:**
 
-## 📂 Struktur Project
-
-Pastikan file-file berikut tersedia di dalam folder project Anda (`security-labs`):
-
-```text
-security-labs/
-├── admin_internal.php  # [NEW] Halaman rahasia (Simulasi proteksi internal)
-├── attacker.html       # Halaman jebakan (Simulasi website penyerang)
-├── db.php              # Koneksi database
-├── login.php           # Halaman login user
-├── profile.php         # [VULNERABLE] Target CSRF (Tanpa perlindungan)
-├── profile_secure.php  # [SECURE] Target CSRF (Dilengkapi CSRF Token)
-├── ssrf.php            # [VULNERABLE] Target SSRF (Hybrid: cURL + Streams)
-├── ssrf_secure.php     # [SECURE] Target SSRF (Dilengkapi Whitelist Domain)
-└── README.md           # Petunjuk praktikum ini
-```
+1.  **SSRF (Server-Side Request Forgery)**
+2.  **Broken Access Control (IDOR & Privilege Escalation)**
+3.  **CSRF (Cross-Site Request Forgery)**
 
 ---
 
-## ⚙️ Instalasi & Persiapan Lingkungan
+## 📂 1. Persiapan Lingkungan (Setup)
 
-Pilih panduan di bawah sesuai aplikasi server lokal yang Anda gunakan.
+Sebelum memulai, pastikan lingkungan kerja Anda sudah siap.
 
-### Opsi A: Pengguna LARAGON
+### A. Penempatan Folder
 
-1.  Buka folder root Laragon (biasanya `C:\laragon\www`).
-2.  Buat folder baru bernama `security-labs`.
-3.  Masukkan semua file project ke dalamnya.
-4.  Klik **Start All** pada Laragon.
-    - **URL Akses:** `http://security-labs.test`
+Letakkan folder `security-labs` di root server lokal Anda:
 
-### Opsi B: Pengguna XAMPP
+- **Pengguna LARAGON:**
+  - Path: `C:\laragon\www\security-labs`
+  - Akses Browser: `http://security-labs.test`
+- **Pengguna XAMPP:**
+  - Path: `C:\xampp\htdocs\security-labs`
+  - Akses Browser: `http://localhost/security-labs`
 
-1.  Buka folder root XAMPP (biasanya `C:\xampp\htdocs`).
-2.  Buat folder baru bernama `security-labs`.
-3.  Masukkan semua file project ke dalamnya.
-4.  Nyalakan **Apache** & **MySQL** di XAMPP Control Panel.
-    - **URL Akses:** `http://localhost/security-labs`
+### B. Instalasi Database (Wajib)
 
----
-
-## 🗄️ Setup Database (Wajib)
-
-Langkah ini diperlukan untuk menyimpan data user login.
+Kita membutuhkan database untuk menyimpan user, role (hak akses), dan catatan rahasia.
 
 1.  Buka **HeidiSQL** (Laragon) atau **phpMyAdmin** (XAMPP).
-2.  Jalankan query SQL berikut:
-
-<!-- end list -->
+2.  Copy dan jalankan query SQL berikut sepenuhnya:
 
 ```sql
--- Reset Database
+-- 1. Hapus database lama agar bersih
 DROP DATABASE IF EXISTS praktikum_keamanan;
+
+-- 2. Buat database baru
 CREATE DATABASE praktikum_keamanan;
 USE praktikum_keamanan;
 
--- Tabel User
+-- 3. Tabel Users (Menyimpan data login & role)
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
     password VARCHAR(255) NOT NULL,
-    email VARCHAR(100) NOT NULL
+    email VARCHAR(100) NOT NULL,
+    role ENUM('admin', 'user') DEFAULT 'user'
 );
 
--- Data Dummy (Password: 12345)
-INSERT INTO users (username, password, email) VALUES
-('admin', '12345', 'admin@target.com'),
-('korban', '12345', 'korban@target.com');
+-- 4. Tabel Notes (Untuk simulasi data pribadi/IDOR)
+CREATE TABLE notes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    title VARCHAR(100),
+    content TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- 5. Masukkan Data Dummy (Password: 12345)
+-- Akun Admin
+INSERT INTO users (username, password, email, role) VALUES
+('admin', '12345', 'admin@target.com', 'admin');
+
+-- Akun Korban (User Biasa)
+INSERT INTO users (username, password, email, role) VALUES
+('korban', '12345', 'korban@target.com', 'user');
+
+-- 6. Masukkan Catatan Dummy
+INSERT INTO notes (user_id, title, content) VALUES
+(1, 'SECRET ADMIN', 'Kode Peluncuran Nuklir: 99-XX-WW. Jangan disebar!'),
+(2, 'Diary Korban', 'Hari ini aku belajar hacking di kampus...');
+
 ```
 
-**Catatan `db.php`:** Pastikan konfigurasi user/password di file `db.php` sudah sesuai (Default: user `root`, password kosong).
+### C. Cek Koneksi
+
+Pastikan file `db.php` Anda memiliki pengaturan user/password database yang benar (Default XAMPP/Laragon biasanya user: `root`, password: _kosong_).
 
 ---
 
-## ⚔️ BAGIAN 1: Simulasi Serangan (Vulnerable)
+## ⚔️ MODUL 1: SSRF (Server-Side Request Forgery)
 
-Di sesi ini, kita akan mengeksploitasi kode yang tidak aman.
+**Konsep:** Memaksa server web untuk melakukan request ke tempat yang tidak seharusnya (misal: jaringan internal atau file sistem).
 
-### 1\. SSRF (Server-Side Request Forgery)
+**Target:** `ssrf.php` (Tools Cek HTTP/Hybrid)
 
-**File Target:** `ssrf.php`
-**Deskripsi:** Tools ini menggunakan logika **Hybrid**. Jika URL adalah HTTP, server menggunakan `cURL`. Jika URL adalah non-HTTP, server menggunakan `file_get_contents`.
+### Langkah Praktikum:
 
 #### Skenario A: Port Scanning (Reconnaissance)
 
-Mendeteksi layanan internal yang tidak bisa diakses lewat browser biasa.
+Mendeteksi apakah ada service database yang berjalan di server lokal.
 
-- **Payload:** `http://localhost:3306`
-- **Hasil:** Server menampilkan respon mentah dari MySQL (contoh: teks aneh berisi `mysql_native_password` atau versi `MariaDB`).
-- **Analisis:** Ini membuktikan server web bisa dipaksa "mengobrol" dengan database internal.
+1. Login sebagai user apa saja (misal: `admin` / `12345`).
+2. Di Dashboard, klik menu **1. Lab SSRF**.
+3. Di kolom input, masukkan: `http://localhost:3306`
+4. Klik **Execute Request**.
+5. **Analisis:**
 
-#### Skenario B: Access Control Bypass (Admin Jebol)
+- Lihat output di terminal hitam. Jika muncul karakter aneh atau tulisan `MariaDB` / `mysql_native_password`, berarti **Port 3306 Terbuka**.
+- Ini membuktikan server web bisa dipaksa "mengobrol" dengan database internal.
 
-Mencoba mengakses halaman rahasia `admin_internal.php` yang memblokir akses dari browser publik.
+#### Skenario B: Access Control Bypass
 
-1.  Coba akses langsung di browser: `http://security-labs.test/admin_internal.php`.
-    - **Hasil:** ⛔ ACCESS DENIED.
-2.  Gunakan SSRF untuk mengaksesnya:
-    - **Payload (Laragon):** `http://security-labs.test/admin_internal.php`
-    - **Payload (XAMPP):** `http://localhost/security-labs/admin_internal.php`
-    - **Hasil:** 🔓 WELCOME SUPER ADMIN. Server mengizinkan request karena berasal dari "localhost" (dirinya sendiri).
+Mencoba masuk ke halaman rahasia `admin_internal.php` yang memblokir akses browser publik.
 
-#### Skenario C: Source Code Disclosure (Credential Theft)
+1. Coba akses langsung di browser: `http://security-labs.test/admin_internal.php`.
 
-Mencuri kode asli PHP (termasuk password database) menggunakan PHP Wrapper.
+- **Hasil:** ⛔ ACCESS DENIED (Anda ditolak).
 
-- **Payload:** `php://filter/read=convert.base64-encode/resource=db.php`
-- **Hasil:** Muncul deretan huruf acak (Base64).
-- **Decode:** Copy teks tersebut -\> Buka [Base64Decode.org](https://www.base64decode.org/) -\> Paste & Decode.
-- **Analisis:** Anda sekarang bisa melihat username & password database secara plain text\!
+2. Kembali ke Lab SSRF (`ssrf.php`).
+3. Masukkan URL target tersebut ke kolom input tools SSRF.
 
-#### Skenario D: Local File Inclusion (LFI)
+- Payload: `http://localhost/security-labs/admin_internal.php` (Sesuaikan domain jika pakai Laragon).
 
-Membaca file konfigurasi server.
+4. **Hasil:** Anda berhasil melihat tulisan **"WELCOME SUPER ADMIN"**.
 
-- **Payload:** `file:///C:/Windows/win.ini` (Windows) atau `file:///etc/passwd` (Linux).
-- **Hasil:** Isi file tampil di layar.
+- **Analisis:** Server mengizinkan request tersebut karena request datang dari "localhost" (server itu sendiri).
 
----
+#### Skenario C: Source Code Disclosure (Mencuri Kredensial)
 
-### 2\. CSRF (Cross-Site Request Forgery)
+Kita akan membaca isi asli file `db.php` untuk mencuri password database.
 
-**File Target:** `profile.php`
-**File Penyerang:** `attacker.html`
-**Konsep:** Memaksa browser user mengirim request ganti email tanpa sepengetahuan user.
+1. Di Lab SSRF, masukkan payload PHP Wrapper:
 
-#### Persiapan Serangan
+- Payload: `php://filter/read=convert.base64-encode/resource=db.php`
 
-Edit file `attacker.html`, sesuaikan baris `<form action="...">` dengan URL Anda:
-
-- _Laragon:_ `http://security-labs.test/profile.php`
-- _XAMPP:_ `http://localhost/security-labs/profile.php`
-
-#### Eksekusi
-
-1.  Buka `login.php` -\> Login sebagai **admin** (Pass: `12345`).
-2.  Pastikan email saat ini `admin@target.com`. **JANGAN LOGOUT**.
-3.  Buka tab baru, jalankan `attacker.html`.
-4.  Kembali ke tab profil admin dan refresh.
-5.  **Hasil:** Email berubah menjadi `hacked_by_attacker@gmail.com`.
+2. **Hasil:** Muncul deretan huruf acak (Base64).
+3. Copy teks tersebut.
+4. Buka situs [Base64Decode.org](https://www.base64decode.org/), Paste, dan Decode.
+5. **Analisis:** Anda sekarang bisa melihat kode PHP asli beserta username & password database!
 
 ---
 
-## 🛡️ BAGIAN 2: Mitigasi & Pertahanan (Secure)
+## 🔓 MODUL 2: Broken Access Control (BAC)
 
-Di sesi ini, kita akan menguji kode yang sudah diamankan.
+**Konsep:** Kegagalan sistem dalam membatasi hak akses user. User biasa bisa melakukan hal-hal yang seharusnya hanya boleh dilakukan admin atau pemilik data.
 
-### 1\. Pengamanan SSRF (Whitelist & Protocol Check)
+### Skenario A: IDOR (Insecure Direct Object Reference)
 
-**File Target:** `ssrf_secure.php`
+_Kasus: Mengintip catatan pribadi milik orang lain._
 
-- **Uji Serangan LFI:**
-  - Masukkan: `file:///C:/Windows/win.ini`
-  - **Hasil:** Gagal. Error: _"Protokol harus HTTP atau HTTPS"_.
-- **Uji Serangan Domain Asing:**
-  - Masukkan: `http://evil.com/script.php`
-  - **Hasil:** Gagal. Error: _"Domain tidak diizinkan"_.
-- **Uji Akses Valid:**
-  - Masukkan: `http://via.placeholder.com/150`
-  - **Hasil:** Berhasil menampilkan gambar (karena domain ada di whitelist).
+1. **Login User Biasa:**
 
-### 2\. Pengamanan CSRF (CSRF Token)
+- Logout dulu jika sedang login sebagai admin.
+- Login sebagai: **`korban`** / `12345`.
 
-**File Target:** `profile_secure.php`
+2. Di Dashboard, klik menu **2. Lab IDOR**.
+3. Klik judul catatan Anda: "Diary Korban".
+4. Perhatikan URL di browser:
 
-#### Persiapan
+- `.../idor.php?note_id=2`
 
-1.  Login kembali sebagai **admin**.
-2.  Akses menu aman: `profile_secure.php`.
-3.  Coba ganti email lewat form yang tersedia. **Berhasil** (karena token valid).
+5. **Serangan:**
 
-#### Uji Serangan
+- Ubah angka `2` di URL menjadi `1`.
+- Tekan Enter.
 
-1.  Edit `attacker.html` lagi. Ubah target action menjadi file secure:
-    - `.../profile_secure.php`
-2.  Buka `attacker.html` di browser.
-3.  **Hasil:** Gagal. Muncul pesan _"SERANGAN CSRF TERDETEKSI\!"_.
-4.  **Analisis:** Serangan gagal karena `attacker.html` tidak memiliki `csrf_token` yang cocok dengan session user saat ini.
+6. **Hasil:** Judul berubah menjadi "SECRET ADMIN" dan isinya "Kode nuklir...".
+
+- **Analisis:** Aplikasi hanya mengecek ID di database tanpa memvalidasi siapa pemiliknya.
+
+### Skenario B: Privilege Escalation (Vertical)
+
+_Kasus: User biasa memaksa masuk ke ruang Admin._
+
+1. Pastikan Anda masih login sebagai **`korban`** (Role: User).
+
+- Lihat badge di samping nama user, tertulis "user".
+
+2. Di Dashboard, klik menu **3. Lab Admin Panel**.
+3. **Hasil:** Anda berhasil masuk ke halaman dengan peringatan merah "SUPER SECRET ADMIN PANEL".
+
+- **Analisis:** Halaman tersebut hanya mengecek "Apakah user sudah login?", tetapi lupa mengecek "Apakah role user adalah admin?".
 
 ---
 
-## 📝 Ringkasan Teknis
+## 🚫 MODUL 3: CSRF (Cross-Site Request Forgery)
 
-| Jenis Serangan | Mengapa Terjadi?                                                                            | Cara Mencegah (Mitigasi)                                                                          |
-| :------------- | :------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------ |
-| **SSRF**       | Server mempercayai input URL user mentah-mentah (baik via `curl` atau `file_get_contents`). | **Whitelist Domain** (Daftar putih domain yang boleh diakses) & Validasi Protokol (Hanya HTTP/S). |
-| **CSRF**       | Server tidak memverifikasi apakah request berasal dari form asli atau website orang lain.   | **CSRF Token** (Kode rahasia unik di setiap form) & SameSite Cookie Attribute.                    |
+**Konsep:** Penyerang membuat jebakan yang memaksa browser korban mengirimkan request sensitif (ganti email/password) tanpa sepengetahuan korban.
+
+**Target:** `profile.php` (Fitur Ganti Email)
+
+### Langkah Praktikum:
+
+#### 1. Persiapan Penyerang (Hacker)
+
+1. Buka file `attacker.html` menggunakan Text Editor (Notepad/VS Code).
+2. Cari baris `<form action="...">`.
+3. Ubah URL action agar sesuai dengan server target Anda:
+
+- Laragon: `http://security-labs.test/profile.php`
+- XAMPP: `http://localhost/security-labs/profile.php`
+
+4. Simpan file.
+
+#### 2. Kondisi Korban
+
+1. Buka `login.php`.
+2. Login sebagai **`admin`** / `12345`.
+3. Pastikan email saat ini adalah: `admin@target.com`.
+4. **PENTING:** Jangan Logout. Biarkan tab ini terbuka (Simulasi user sedang aktif bekerja).
+
+#### 3. Eksekusi Serangan
+
+1. Buka **Tab Baru** di browser.
+2. Jalankan file penyerang: `http://security-labs.test/attacker.html` (atau `localhost`).
+3. Website akan berkedip sebentar (JavaScript otomatis mengirim form tersembunyi).
+
+#### 4. Verifikasi Dampak
+
+1. Kembali ke tab Dashboard Admin (`profile.php`).
+2. Refresh halaman.
+3. **Hasil:** Email admin telah berubah menjadi `hacked_by_attacker@gmail.com`.
+
+---
+
+## 🛡️ Solusi & Perbaikan (Mitigasi)
+
+Setiap kerentanan di atas memiliki versi kode yang aman (_Secure Coding_) di folder ini. Silakan pelajari perbedaannya:
+
+| Jenis Celah  | File Vulnerable   | File Secure              | Teknik Perbaikan                                                                           |
+| ------------ | ----------------- | ------------------------ | ------------------------------------------------------------------------------------------ |
+| **SSRF**     | `ssrf.php`        | `ssrf_secure.php`        | **Whitelist Domain:** Hanya mengizinkan request ke domain yang terdaftar secara eksplisit. |
+| **IDOR**     | `idor.php`        | `idor_secure.php`        | **Ownership Check:** Menambahkan `AND user_id = current_user` pada query SQL.              |
+| **Priv Esc** | `admin_panel.php` | `admin_panel_secure.php` | **Role Validation:** Mengecek `$_SESSION['role'] === 'admin'` sebelum menampilkan konten.  |
+| **CSRF**     | `profile.php`     | `profile_secure.php`     | **CSRF Token:** Menambahkan token acak unik di form dan memverifikasinya saat submit.      |
+
+---
+
+_Dibuat untuk tujuan edukasi Keamanan Siber._
