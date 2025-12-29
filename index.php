@@ -15,36 +15,66 @@ include 'includes/header.php';
 </div>
 
 <div class="module-grid">
-    <!-- Modul 1: Injection -->
-    <div class="card">
-        <h3>💉 Modul 1: Injection & Input</h3>
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
-            <a href="modules/sqli/index.php" class="btn btn-sm">SQLi</a>
-            <a href="modules/xss/index.php" class="btn btn-sm">XSS</a>
-            <a href="ssrf.php" class="btn btn-sm">SSRF</a>
+    <!-- Phase 1: Reconnaissance -->
+    <div class="card" style="border-left: 4px solid #6366f1;">
+        <h3>Phase 1: Reconnaissance</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">Tahap awal pengumpulan informasi.</p>
+        <div style="margin-top: 1rem;">
+            <a href="modules/info_gathering/index.php" class="btn btn-sm">Info Gathering</a>
         </div>
-        <p style="margin-top: 0.5rem; font-size: 0.9rem;">Manipulasi input untuk menembus logika sistem.</p>
     </div>
 
-    <!-- Modul 2: Access Control -->
-    <div class="card">
-        <h3>🔓 Modul 2: Access Control</h3>
+    <!-- Phase 2: Authentication -->
+    <div class="card" style="border-left: 4px solid #ef4444;">
+        <h3>Phase 2: Authentication</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">Serangan pada mekanisme login.</p>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
-            <a href="idor.php" class="btn btn-sm">IDOR</a>
-            <a href="admin_panel.php" class="btn btn-sm">PrivEsc</a>
+            <a href="modules/bruteforce/index.php" class="btn btn-sm">Bruteforce</a>
+            <a href="modules/sqli/index.php" class="btn btn-sm">SQLi Login Bypass</a>
+        </div>
+    </div>
+
+    <!-- Phase 3: Server-Side Attacks -->
+    <div class="card" style="border-left: 4px solid #0f172a;">
+        <h3>Phase 3: Server-Side</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">Mengeksekusi perintah di server.</p>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
+            <a href="modules/cmd_injection/index.php" class="btn btn-sm">Cmd Injection</a>
+            <a href="modules/file_inclusion/index.php" class="btn btn-sm">LFI</a>
+            <a href="modules/file_upload/index.php" class="btn btn-sm">File Upload</a>
+            <a href="ssrf.php" class="btn btn-sm">SSRF</a>
+            <a href="modules/ssti/index.php" class="btn btn-sm">SSTI</a>
+        </div>
+    </div>
+
+    <!-- Phase 4: Client-Side Attacks -->
+    <div class="card" style="border-left: 4px solid #f59e0b;">
+        <h3>Phase 4: Client-Side</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">Serangan terhadap pengguna lain.</p>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
+            <a href="modules/xss/index.php" class="btn btn-sm">XSS</a>
             <a href="profile.php" class="btn btn-sm">CSRF</a>
         </div>
-        <p style="margin-top: 0.5rem; font-size: 0.9rem;">Eksploitasi hak akses dan otorisasi.</p>
     </div>
 
-    <!-- Modul 3: Data Protection -->
-    <div class="card" style="border-color: var(--primary);">
-        <h3>🔐 Modul 3: Data Protection</h3>
+    <!-- Phase 5: Access Control -->
+    <div class="card" style="border-left: 4px solid #ec4899;">
+        <h3>Phase 5: Access Control</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">Pelanggaran hak akses.</p>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
-           <a href="modules/crypto/modul1.php" class="btn btn-sm">AES</a>
-           <a href="modules/crypto/modul2.php" class="btn btn-sm">Hashing</a>
+            <a href="idor.php" class="btn btn-sm">IDOR</a>
+            <a href="admin_panel.php" class="btn btn-sm">Privilege Escalation</a>
         </div>
-        <p style="margin-top: 0.5rem; font-size: 0.9rem;">Kriptografi, Enkripsi, dan Hashing.</p>
+    </div>
+
+    <!-- Phase 6: Defense & Reporting -->
+    <div class="card" style="border-left: 4px solid #10b981;">
+        <h3>Phase 6: Reporting</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">Defensive security & dokumentasi.</p>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
+           <a href="modules/crypto/index.php" class="btn btn-sm">Cryptography</a>
+           <a href="modules/reporting/index.php" class="btn btn-sm">Reporting Guide</a>
+        </div>
     </div>
 </div>
 

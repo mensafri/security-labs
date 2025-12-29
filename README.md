@@ -10,22 +10,35 @@ Aplikasi ini dirancang sebagai laboratorium mandiri bagi mahasiswa untuk memprak
 
 Platform ini dibagi menjadi beberapa modul pembelajaran utama:
 
-### 💉 Modul 1: Injection & Input Validation
-Mempelajari bagaimana input yang tidak divalidasi dapat memanipulasi logika aplikasi.
-1.  **SQL Injection (SQLi):** Teknik memanipulasi query database untuk mem-bypass login.
-2.  **Cross-Site Scripting (XSS):** Menyisipkan skrip berbahaya ke halaman web yang dilihat pengguna lain.
-3.  **SSRF (Server-Side Request Forgery):** Memaksa server untuk mengakses resource internal yang terisolasi.
+### 🔍 Phase 1: Reconnaissance
+1.  **Information Gathering:** Mengumpulkan informasi target (`robots.txt`, Source Code Comments).
 
-### 🔓 Modul 2: Broken Access Control
-Mempelajari kegagalan aplikasi dalam membatasi hak akses pengguna.
-1.  **IDOR (Insecure Direct Object Reference):** Mengakses data pribadi pengguna lain dengan memanipulasi parameter ID.
-2.  **Privilege Escalation:** Mengakses fitur administrator menggunakan akun user biasa.
-3.  **CSRF (Cross-Site Request Forgery):** Memaksa browser pengguna yang sedang login untuk melakukan tindakan tanpa persetujuan mereka.
+### 🔑 Phase 2: Authentication
+1.  **Bruteforce:** Serangan menebak password.
+2.  **SQL Injection (SQLi):**
+    *   **Login Bypass:** Manipulasi logika OR.
+    *   **UNION Attack:** Teknik dumping database user & password.
 
-### 🔐 Modul 3: Data Protection
-Mempelajari teknik enkripsi dan integritas data.
-1.  **Kriptografi Simetris (AES):** Simulasi enkripsi dan dekripsi pesan.
-2.  **Hashing & Password Security:** Memahami fungsi Hash satu arah dan pentingnya "Salt" untuk keamanan password.
+### 💻 Phase 3: Server-Side Attacks
+1.  **Command Injection:** Eksekusi perintah OS.
+2.  **SSTI:** Server-Side Template Injection.
+3.  **File Inclusion (LFI):** Membaca file server.
+4.  **File Upload:** Upload backdoor.
+5.  **SSRF:** Request forgery internal.
+
+### 🎭 Phase 4: Client-Side Attacks
+1.  **XSS (Cross-Site Scripting):**
+    *   **Reflected:** Script dipantulkan via URL.
+    *   **Stored:** Script tersimpan di database Guestbook.
+2.  **CSRF (Cross-Site Request Forgery):** Memalsukan aksi pengguna tanpa sepengetahuan mereka.
+
+### 🔓 Phase 5: Access Control
+1.  **IDOR (Insecure Direct Object Reference):** Akses data milik user lain lewat manipulasi ID.
+2.  **Privilege Escalation:** Mengakses fitur Admin dengan role User biasa.
+
+### 📝 Phase 6: Defense & Reporting
+1.  **Cryptography:** Enkripsi (AES) dan Hashing (Secure Passwords).
+2.  **Reporting:** Panduan menulis laporan Pentest profesional.
 
 ---
 

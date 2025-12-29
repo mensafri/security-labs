@@ -35,3 +35,17 @@ INSERT INTO `notes` (`id`, `user_id`, `title`, `content`) VALUES
 (1, 1, 'Rahasia Admin', 'Password server adalah: Sup3rS3cur3P@ssw0rd! Jangan sampai bocor.'),
 (2, 2, 'Catatan Harian', 'Hari ini saya belajar tentang IDOR. Sangat menarik!'),
 (3, 2, 'To-Do List', '1. Beli kopi\n2. Kerjakan tugas Kriptografi');
+
+-- Table Structure for Guestbook (Used in Stored XSS Lab)
+CREATE TABLE IF NOT EXISTS `guestbook` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `name` varchar(50) NOT NULL,
+    `message` text NOT NULL,
+    `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Dumping Data for Guestbook
+INSERT INTO `guestbook` (`name`, `message`) VALUES
+('Budi', 'Halo, website ini sangat bermanfaat!'),
+('Siti', 'Belajar keamanan web ternyata seru ya.');
