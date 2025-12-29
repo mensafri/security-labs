@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modul Keamanan Data & Kriptografi</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; }
+        h1, h2, h3 { color: #2c3e50; }
+        .box { border: 1px solid #ddd; padding: 15px; background: #f9f9f9; border-radius: 5px; margin: 10px 0; }
+        code { background: #eee; padding: 2px 5px; border-radius: 3px; }
+        hr { border: 0; border-top: 1px solid #ddd; margin: 30px 0; }
+        .header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #eee; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Materi Kuliah Keamanan Data</h1>
+        <p>Modul Pembelajaran Lengkap: Kriptografi & Keamanan Aplikasi</p>
+    </div>
+
+    <!-- MODUL 1 -->
+    <h1>MODUL 1: Kriptografi Dasar</h1>
+
+    <h2>1. Pengantar</h2>
+    <p>Kriptografi dibutuhkan untuk melindungi data sensitif (password, token, data pribadi) dari ancaman seperti penyadapan (eavesdropping), modifikasi (tampering), dan pemalsuan.</p>
+    <div class="box">
+        <strong>Tujuan Kriptografi (CIA Triad):</strong>
+        <ul>
+            <li>Confidentiality (Kerahasiaan)</li>
+            <li>Integrity (Keutuhan)</li>
+            <li>Authentication (Otentikasi)</li>
+            <li>Non-repudiation (Nirpenyangkalan)</li>
+        </ul>
+    </div>
+
+    <h2>2. Enkripsi Simetris</h2>
+    <p>Menggunakan satu kunci yang sama untuk enkripsi dan dekripsi. Contoh: AES (Advanced Encryption Standard).</p>
+    <p><em>Kelebihan:</em> Cepat. <em>Kekurangan:</em> Distribusi kunci sulit.</p>
+
+    <h2>3. Enkripsi Asimetris</h2>
+    <p>Menggunakan dua kunci: Public Key (untuk enkripsi) dan Private Key (untuk dekripsi).</p>
+    <p><em>Contoh:</em> RSA, ECC. Digunakan untuk pertukaran kunci aman.</p>
+
+    <h2>4. Hubungan Hibrida</h2>
+    <p>Kombinasi keduanya: Enkripsi Asimetris untuk Handshake (pertukaran kunci awal), lalu Enkripsi Simetris untuk transfer data selanjutnya (agar cepat).</p>
+
+    <hr>
+
+    <!-- MODUL 2 -->
+    <h1>MODUL 2: Hash & TLS</h1>
+
+    <h2>1. Hash Function</h2>
+    <p>Fungsi satu arah yang mengubah input menjadi string panjang tetap (hash value). Tidak bisa didekripsi.</p>
+    <p>Karakteristik: Deterministik, Avalanche Effect, Collision Resistance.</p>
+
+    <h2>2. Password Security</h2>
+    <p>Simpan password dalam bentuk Hash, jangan plaintext! Gunakan <strong>Salt</strong> (data acak tambahan) untuk mencegah serangan Rainbow Table.</p>
+    <p><em>Algoritma Aman:</em> bcrypt, Argon2, SHA-256 (dengan salt).</p>
+    <p><em>Algoritma Usang:</em> MD5, SHA-1.</p>
+
+    <h2>3. Digital Signature</h2>
+    <p>Menjamin autentikasi dan integritas. Menggunakan Hash pesan yang dienkripsi dengan Private Key pengirim.</p>
+
+    <h2>4. TLS / HTTPS</h2>
+    <p>Protokol keamanan web. Menggunakan sertifikat digital (CA) untuk verifikasi identitas server.</p>
+    <div class="box">
+        <strong>Ancaman tanpa TLS:</strong>
+        <p>Man-in-the-Middle (MITM) attack, di mana hacker di tengah jalur komunikasi bisa membaca data kita.</p>
+    </div>
+
+</body>
+</html>

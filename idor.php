@@ -1,78 +1,84 @@
 <?php
+session_start();
+$base_path = './';
 include 'db.php';
+// IDOR VULNERABILITY: Fetches note based on GET ID without checking ownership
+// Example: idor.php?note_id=1 (Accessing Admin's note)
 
-// Cek Login
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
-
-$current_user_id = $_SESSION['user_id'];
+include 'includes/header.php';
 ?>
 
-<!DOCTYPE html>
-<html>
+<div class="card">
+    <div class="module-header" style="background: linear-gradient(135deg, #db2777, #9d174d);">
+        <h1>🔓 Lab Broken Access Control: IDOR</h1>
+        <p>Insecure Direct Object Reference.</p>
+    </div>
 
-<head>
-    <title>Broken Access Control - IDOR</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-        }
+    <div class="alert alert-info">
+        <strong>📚 Langkah Percobaan:</strong>
+        <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+            <li>Klik salah satu catatan Anda di daftar kiri.</li>
+            <li>Perhatikan URL di browser: <code>idor.php?note_id=...</code></li>
+            <li>Ubah angka ID tersebut menjadi <code>1</code> (Catatan Admin).</li>
+            <li>Tekan Enter. Anda akan melihat data rahasia user lain.</li>
+        </ol>
+    </div>
 
-        .note {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-bottom: 10px;
-            background: #f9f9f9;
-        }
+    <div class="grid-2">
+        <!-- List Notes -->
+        <div>
+            <h3>Catatan Saya</h3>
+            <ul style="list-style: none; padding: 0;">
+                <?php
+                $my_id = $_SESSION['user_id'];
+                $result = mysqli_query($conn, "SELECT * FROM notes WHERE user_id = $my_id");
+                while ($row = mysqli_fetch_assoc($result)) {
+                    echo "<li style='margin-bottom: 0.5rem;'>";
+                    echo "<a href='idor.php?note_id=" . $row['id'] . "' class='btn btn-secondary' style='width: 100%; text-align: left;'>📝 " . htmlspecialchars($row['title']) . "</a>";
+                    echo "</li>";
+                }
+                ?>
+            </ul>
+        </div>
 
-        .warning {
-            color: red;
-            font-weight: bold;
-        }
-    </style>
-</head>
+        <!-- Note Detail (VULNERABLE AREA) -->
+        <div>
+            <h3>Detail Catatan</h3>
+            <?php
+            if (isset($_GET['note_id'])) {
+                $id = $_GET['note_id'];
+                
+                // VULNERABLE QUERY: No 'AND user_id = $my_id' check!
+                $detail = mysqli_query($conn, "SELECT * FROM notes WHERE id = $id");
+                $note = mysqli_fetch_assoc($detail);
+                
+                if ($note) {
+                    echo "<div class='card'>";
+                    echo "<h2>" . htmlspecialchars($note['title']) . "</h2>";
+                    echo "<p>" . htmlspecialchars($note['content']) . "</p>";
+                    
+                    // Educational feedback
+                    if ($note['user_id'] != $my_id) {
+                        echo "<div class='alert alert-danger' style='margin-top: 1rem;'>";
+                        echo "<strong>⚠️ ANALISIS KERENTANAN:</strong><br>";
+                        echo "Anda sedang melihat data milik User ID " . $note['user_id'] . ", padahal ID Anda adalah " . $my_id . ". <br>Ini membuktikan adanya celah <em>Insecure Direct Object Reference (IDOR)</em>.";
+                        echo "</div>";
+                    }
+                    
+                    echo "</div>";
+                } else {
+                    echo "<div class='card'><p>Catatan tidak ditemukan!</p></div>";
+                }
+            } else {
+                echo "<p class='text-muted'>Pilih catatan di samping.</p>";
+            }
+            ?>
+        </div>
+    </div>
+</div>
 
-<body>
-    <h1>Catatan Pribadi (Vulnerable IDOR)</h1>
-    <p>Halo, <?= $_SESSION['username'] ?>. Klik judul untuk membaca catatan.</p>
-
-    <h3>Daftar Catatan Anda:</h3>
-    <ul>
-        <?php
-        // Tampilkan list hanya milik user yang login (Ini sudah benar)
-        $q = mysqli_query($conn, "SELECT * FROM notes WHERE user_id = $current_user_id");
-        while ($row = mysqli_fetch_assoc($q)) {
-            echo "<li><a href='?note_id=" . $row['id'] . "'>" . $row['title'] . "</a></li>";
-        }
-        ?>
-    </ul>
-
-    <hr>
-
-    <?php
-    // BAGIAN VULNERABLE
-    // Menampilkan detail catatan berdasarkan GET 'note_id'
-    if (isset($_GET['note_id'])) {
-        $id = $_GET['note_id'];
-
-        // PERHATIKAN: Query ini TIDAK mengecek kepemilikan (user_id)!
-        // Selama ID-nya ada di database, data akan ditampilkan.
-        $detail = mysqli_query($conn, "SELECT * FROM notes WHERE id = $id");
-
-        if ($data = mysqli_fetch_assoc($detail)) {
-            echo "<div class='note'>";
-            echo "<h2>" . $data['title'] . "</h2>";
-            echo "<p>" . $data['content'] . "</p>";
-            echo "<small>Note ID: " . $data['id'] . "</small>";
-            echo "</div>";
-        } else {
-            echo "Catatan tidak ditemukan.";
-        }
-    }
-    ?>
-</body>
-
-</html>
+<?php include 'includes/footer.php'; ?>

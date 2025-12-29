@@ -1,10 +1,11 @@
 <?php
 // login.php
+session_start();
 include 'db.php';
 
 // Jika user sudah login, langsung alihkan ke profile
 if (isset($_SESSION['user_id'])) {
-    header("Location: profile.php");
+    header("Location: index.php");
     exit;
 }
 
@@ -27,113 +28,67 @@ if (isset($_POST['login'])) {
         $_SESSION['role']     = $row['role']; // PENTING: Untuk materi Broken Access Control
 
         // Redirect ke halaman profil
-        header("Location: profile.php");
+        header("Location: index.php");
         exit;
     } else {
         $error = "Username atau Password salah!";
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Security Labs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
     <style>
         body {
-            font-family: sans-serif;
             display: flex;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #f0f2f5;
-            margin: 0;
+            justify-content: center;
+            padding-top: 5vh;
         }
-
-        .login-container {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 300px;
-        }
-
-        h2 {
-            text-align: center;
-            color: #333;
-        }
-
-        input[type="text"],
-        input[type="password"] {
+        .login-card {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .error-msg {
-            color: red;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .hint {
-            font-size: 12px;
-            color: #666;
-            margin-top: 15px;
-            text-align: center;
-            background: #eee;
-            padding: 5px;
-            border-radius: 4px;
+            max-width: 400px;
         }
     </style>
 </head>
-
 <body>
 
-    <div class="login-container">
-        <h2>Login Labs</h2>
+    <div class="card login-card">
+        <h2 style="text-align: center; margin-bottom: 2rem;">🔐 Login Labs</h2>
 
         <?php if ($error): ?>
-            <div class="error-msg"><?= $error ?></div>
+            <div class="alert alert-error">
+                <?= $error ?>
+            </div>
         <?php endif; ?>
 
         <form method="POST">
-            <label>Username</label>
-            <input type="text" name="username" placeholder="admin / korban" required autofocus>
+            <div>
+                <label>Username</label>
+                <input type="text" name="username" placeholder="admin / korban" required autofocus>
+            </div>
 
-            <label>Password</label>
-            <input type="password" name="password" placeholder="12345" required>
+            <div>
+                <label>Password</label>
+                <input type="password" name="password" placeholder="12345" required>
+            </div>
 
-            <button type="submit" name="login">Masuk</button>
+            <button type="submit" name="login" class="btn" style="width: 100%;">Masuk</button>
         </form>
 
-        <div class="hint">
-            <strong>Akun Demo:</strong><br>
-            Admin: <code>admin</code> / <code>12345</code><br>
-            User: <code>korban</code> / <code>12345</code>
+        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+            <p style="font-size: 0.875rem; color: var(--text-muted); text-align: center; margin-bottom: 0.5rem;">Akun Demo:</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; font-size: 0.875rem;">
+                <code>admin / 12345</code>
+                <code>korban / 12345</code>
+            </div>
         </div>
     </div>
 
 </body>
-
 </html>

