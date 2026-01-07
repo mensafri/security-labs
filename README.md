@@ -1,81 +1,70 @@
-# Security Labs: Web Vulnerability Workshop
+# Security Labs: Workshop Keamanan Data & Informasi
 
-Selamat datang di **Security Labs**, sebuah platform pembelajaran interaktif untuk memahami kerentanan keamanan web dan teknik *Secure Coding*.
+Selamat datang di **Security Labs**, sebuah platform pembelajaran interaktif yang dirancang untuk praktikum mata kuliah Keamanan Data dan Informasi. Platform ini mencakup 14 Modul Praktikum mulai dari Kriptografi, Penetration Testing Management, hingga Web Exploitation.
 
-Aplikasi ini dirancang sebagai laboratorium mandiri bagi mahasiswa untuk mempraktikkan serangan siber (Ethical Hacking) dan memahami cara menambalnya.
+Aplikasi ini bersifat **Educational Sandbox**. Semua kerentanan (SQLi, XSS, dll) dibuat secara sengaja untuk tujuan pembelajaran.
 
 ---
 
-## 📚 Kurikulum Modul
+## 📚 Sistematika Modul Praktikum
 
-Platform ini dibagi menjadi beberapa modul pembelajaran utama:
+Sesuai dengan kurikulum **Sistematika Penulisan Laporan**, berikut adalah daftar modul yang tersedia:
 
-### 🔍 Phase 1: Reconnaissance
-1.  **Information Gathering:** Mengumpulkan informasi target (`robots.txt`, Source Code Comments).
+### 🔐 BAGIAN A: KRIPTOGRAFI
 
-### 🔑 Phase 2: Authentication
-1.  **Bruteforce:** Serangan menebak password.
-2.  **SQL Injection (SQLi):**
-    *   **Login Bypass:** Manipulasi logika OR.
-    *   **UNION Attack:** Teknik dumping database user & password.
+1.  **Modul 1:** Kriptografi Klasik 1 (Caesar & Subsitusi, Vigenere).
+2.  **Modul 2:** Kriptografi Klasik 2 (Transposisi).
+3.  **Modul 3:** Kriptografi Klasik 3 (Affine & Super Cipher).
+4.  **Modul 4:** Stream Cipher (RC4).
+5.  **Modul 5:** Block Cipher (Visualisasi Mode Operasi ECB/CBC).
+6.  **Modul 6:** Algoritma Modern (DES & AES).
+7.  **Modul 7:** Fungsi Hash (MD5, SHA).
 
-### 💻 Phase 3: Server-Side Attacks
-1.  **Command Injection:** Eksekusi perintah OS.
-2.  **SSTI:** Server-Side Template Injection.
-3.  **File Inclusion (LFI):** Membaca file server.
-4.  **File Upload:** Upload backdoor.
-5.  **SSRF:** Request forgery internal.
+### 🛡️ BAGIAN B: KEAMANAN WEB (Pentest)
 
-### 🎭 Phase 4: Client-Side Attacks
-1.  **XSS (Cross-Site Scripting):**
-    *   **Reflected:** Script dipantulkan via URL.
-    *   **Stored:** Script tersimpan di database Guestbook.
-2.  **CSRF (Cross-Site Request Forgery):** Memalsukan aksi pengguna tanpa sepengetahuan mereka.
-
-### 🔓 Phase 5: Access Control
-1.  **IDOR (Insecure Direct Object Reference):** Akses data milik user lain lewat manipulasi ID.
-2.  **Privilege Escalation:** Mengakses fitur Admin dengan role User biasa.
-
-### 📝 Phase 6: Defense & Reporting
-1.  **Cryptography:** Enkripsi (AES) dan Hashing (Secure Passwords).
-2.  **Reporting:** Panduan menulis laporan Pentest profesional.
+8.  **Modul 8:** Penetration Testing Management (Pre-Engagement & Scoping Simulator).
+9.  **Modul 9:** Instalasi DVWA (Damn Vulnerable Web App) - _Panduan Instalasi Instruktur_.
+10. **Modul 10:** Information Gathering (Reconnaissance Tools: Whois, DNS, Headers).
+11. **Modul 11:** Cross Site Scripting (XSS) - _Reflected & Stored Guestbook_.
+12. **Modul 12:** Command Injection dan File Inclusion (LFI).
+13. **Modul 13:** SQL Injection, Brute Force, dan CSRF.
+14. **Modul 14:** File Upload, Vulnerability, SSRF, dan Reporting.
 
 ---
 
 ## 🛠️ Persiapan & Instalasi
 
 ### 1. Requirements
-*   Web Server (Apache/Nginx) via XAMPP atau Laragon.
-*   PHP 7.4 atau lebih baru.
-*   MySQL / MariaDB.
+
+- Web Server (Apache/Nginx) via XAMPP.
+- PHP 7.4 atau lebih baru.
+- MySQL / MariaDB.
 
 ### 2. Instalasi Database
-Aplikasi ini membutuhkan database `praktikum_keamanan`.
-1.  Buka **phpMyAdmin** atau **HeidiSQL**.
-2.  Buat database baru: `praktikum_keamanan`.
-3.  **Import File Database:**
-    *   Import file **`database.sql`** yang ada di folder ini.
-    *   Ini akan membuat tabel standar `users` dan `notes` beserta data dummy.
 
-### 3. Login Default
+Aplikasi ini membutuhkan database `praktikum_keamanan`.
+
+1.  Buka **phpMyAdmin**.
+2.  Buat database baru: `praktikum_keamanan`.
+3.  Import file **`database.sql`** yang disediakan.
+
+### 3. Akun Default
+
 Gunakan akun berikut untuk simulasi:
 
-| Peran | Username | Password | Keterangan |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin` | `12345` | Memiliki akses penuh. |
-| **User** | `korban` | `12345` | Akun standar untuk simulasi serangan. |
-
-> **Rekomendasi:** Gunakan akun `korban` untuk sebagian besar modul guna menguji apakah user biasa bisa menembus batasan keamanan.
+| Peran     | Username | Password | Keterangan                            |
+| :-------- | :------- | :------- | :------------------------------------ |
+| **Admin** | `admin`  | `12345`  | Memiliki akses penuh.                 |
+| **User**  | `korban` | `12345`  | Akun standar untuk simulasi serangan. |
 
 ---
 
-## 🎓 Petunjuk Penggunaan
+## 🎓 Fitur Edukasi Baru
 
-1.  **Pilih Modul:** Gunakan **Sidebar** di sebelah kiri untuk navigasi antar materi.
-2.  **Baca Tujuan:** Setiap modul diawali dengan penjelasan singkat mengenai kerentanan.
-3.  **Simulasi:** Lakukan percobaan serangan pada form atau URL yang disediakan.
-4.  **Analisis:** Perhatikan respon sistem. Jika berhasil menembus keamanan, pelajari mengapa hal itu bisa terjadi.
-5.  **Mitigasi (Opsional):** Cek file dengan akhiran `_secure.php` (misal `idor_secure.php`) di source code untuk melihat bagaimana cara menambal celah tersebut.
+- **Show Logic Code:** Pada modul Kriptografi, mahasiswa dapat melihat kode PHP asli di balik algoritma enkripsi.
+- **Visual Simulators:** Modul Pentest dilengkapi dengan form simulasi kontrak kerja (Scoping) dan Terminal Linux virtual.
+- **Step-by-Step Guide:** Setiap lab dilengkapi dengan "Langkah Percobaan" yang terstruktur.
 
 ---
-*Dibuat untuk tujuan Pendidikan. Penyalahgunaan materi untuk tindakan ilegal di luar tanggung jawab pengembang.*
+
+_Dibuat untuk tujuan Pendidikan. Penyalahgunaan materi untuk tindakan ilegal di luar tanggung jawab pengembang._
