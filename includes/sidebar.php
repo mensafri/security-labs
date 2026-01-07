@@ -20,66 +20,72 @@ $uri = $_SERVER['REQUEST_URI'];
     <nav class="sidebar-nav">
         <div class="nav-label">Main</div>
         <a href="<?= $base_path ?>index.php" class="<?= $current_page == 'index.php' ? 'active' : '' ?>">📊 Dashboard</a>
+
+        <div class="nav-label">Kriptografi (Modul 1-7)</div>
         
-        <div class="nav-label">1. Reconnaissance</div>
+        <!-- Modul 1: Klasik 1 -->
+        <a href="<?= $base_path ?>modules/crypto/classic/index.php" class="<?= strpos($uri, 'crypto/classic') !== false ? 'active' : '' ?>">
+            Modul 1: Kriptografi Klasik 1-3
+        </a>
+        <div style="padding-left: 1rem; font-size: 0.85rem;">
+            <a href="<?= $base_path ?>modules/crypto/classic/caesar.php" style="border:none">• Modul 1: Caesar/Substitusi</a>
+            <a href="<?= $base_path ?>modules/crypto/classic/vigenere.php" style="border:none">• Modul 1: Vigenere</a>
+            <a href="<?= $base_path ?>modules/crypto/classic/transposition.php" style="border:none">• Modul 2: Transposisi</a>
+            <a href="<?= $base_path ?>modules/crypto/classic/affine.php" style="border:none">• Modul 3: Affine</a>
+            <a href="<?= $base_path ?>modules/crypto/classic/super.php" style="border:none">• Modul 3: Super Cipher</a>
+        </div>
+
+        <!-- Modul 4 & 5 & 6 -->
+        <a href="<?= $base_path ?>modules/crypto/stream/rc4.php" class="<?= strpos($uri, 'rc4.php') !== false ? 'active' : '' ?>">
+            Modul 4: Stream Cipher (RC4)
+        </a>
+        <a href="<?= $base_path ?>modules/crypto/block/modes.php" class="<?= strpos($uri, 'modes.php') !== false ? 'active' : '' ?>">
+            Modul 5: Block Cipher
+        </a>
+        <a href="<?= $base_path ?>modules/crypto/block/des.php" class="<?= strpos($uri, 'des.php') !== false ? 'active' : '' ?>">
+            Modul 6: Admin DES & AES
+        </a>
+        <a href="<?= $base_path ?>modules/crypto/modul2.php" class="<?= strpos($uri, 'modul2.php') !== false ? 'active' : '' ?>">
+            Modul 7: Fungsi Hash
+        </a>
+
+        <div class="nav-label">Keamanan Web (Modul 8-14)</div>
+
+        <a href="<?= $base_path ?>modules/pentest/index.php" class="<?= strpos($uri, 'pentest') !== false ? 'active' : '' ?>">
+            Modul 8 : Penetration Testing
+        </a>
+        <a href="<?= $base_path ?>modules/dvwa/index.php" class="<?= strpos($uri, 'dvwa') !== false ? 'active' : '' ?>">
+            Modul 9 : Instalasi DVWA
+        </a>
         <a href="<?= $base_path ?>modules/info_gathering/index.php" class="<?= strpos($uri, 'info_gathering') !== false ? 'active' : '' ?>">
-             Info Gathering
+            Modul 10 : Information Gathering
         </a>
-
-        <div class="nav-label">2. Authentication</div>
-        <a href="<?= $base_path ?>modules/bruteforce/index.php" class="<?= strpos($uri, 'bruteforce') !== false ? 'active' : '' ?>">
-             Bruteforce
+        <a href="<?= $base_path ?>modules/xss/index.php" class="<?= strpos($uri, 'xss') !== false ? 'active' : '' ?>">
+            Modul 11 : Cross Site Scripting (XSS)
         </a>
-        <a href="<?= $base_path ?>modules/sqli/index.php" class="<?= $current_page == 'index.php' && strpos($uri, 'sqli') !== false ? 'active' : '' ?>">
-            💉 SQLi: Login Bypass
-        </a>
-        <a href="<?= $base_path ?>modules/sqli/union.php" class="<?= $current_page == 'union.php' ? 'active' : '' ?>" style="margin-left: 1rem; font-size: 0.9rem;">
-            • Union Attack
-        </a>
-
-        <div class="nav-label">3. Server-Side Attacks</div>
         <a href="<?= $base_path ?>modules/cmd_injection/index.php" class="<?= strpos($uri, 'cmd_injection') !== false ? 'active' : '' ?>">
-            💻 Command Injection
+            Modul 12 : Command Injection dan File Inclusion
         </a>
-        <a href="<?= $base_path ?>modules/file_inclusion/index.php" class="<?= strpos($uri, 'file_inclusion') !== false ? 'active' : '' ?>">
-            📁 File Inclusion (LFI)
+        <!-- Sub-menu for File Inclusion linking to Modul 12 context -->
+        <div style="padding-left: 1rem; font-size: 0.85rem;">
+            <a href="<?= $base_path ?>modules/file_inclusion/index.php" style="border:none">• File Inclusion (Praktek)</a>
+        </div>
+
+        <a href="<?= $base_path ?>modules/sqli/index.php" class="<?= strpos($uri, 'sqli') !== false ? 'active' : '' ?>">
+            Modul 13 : SQL, Brute Force dan CSRF
         </a>
+        <div style="padding-left: 1rem; font-size: 0.85rem;">
+            <a href="<?= $base_path ?>modules/bruteforce/index.php" style="border:none">• Brute Force</a>
+            <a href="<?= $base_path ?>profile.php" style="border:none">• CSRF</a>
+        </div>
+
         <a href="<?= $base_path ?>modules/file_upload/index.php" class="<?= strpos($uri, 'file_upload') !== false ? 'active' : '' ?>">
-            📤 File Upload
+            Modul 14 : File Upload, Vulnerability, SSRF, dan Reporting
         </a>
-        <a href="<?= $base_path ?>ssrf.php" class="<?= $current_page == 'ssrf.php' ? 'active' : '' ?>">
-            🌐 SSRF
-        </a>
-        <a href="<?= $base_path ?>modules/ssti/index.php" class="<?= strpos($uri, 'ssti') !== false ? 'active' : '' ?>">
-            🧩 SSTI
-        </a>
-
-        <div class="nav-label">4. Client-Side Attacks</div>
-        <a href="<?= $base_path ?>modules/xss/index.php" class="<?= $current_page == 'index.php' && strpos($uri, 'xss') !== false ? 'active' : '' ?>">
-            📢 XSS: Reflected
-        </a>
-        <a href="<?= $base_path ?>modules/xss/stored.php" class="<?= $current_page == 'stored.php' ? 'active' : '' ?>" style="margin-left: 1rem; font-size: 0.9rem;">
-            • Stored (Guestbook)
-        </a>
-        <a href="<?= $base_path ?>profile.php" class="<?= $current_page == 'profile.php' ? 'active' : '' ?>">
-            🎭 CSRF
-        </a>
-
-        <div class="nav-label">5. Access Control</div>
-        <a href="<?= $base_path ?>idor.php" class="<?= $current_page == 'idor.php' ? 'active' : '' ?>">
-            🆔 IDOR
-        </a>
-        <a href="<?= $base_path ?>admin_panel.php" class="<?= $current_page == 'admin_panel.php' ? 'active' : '' ?>">
-            ⛔ Privilege Escalation
-        </a>
-
-        <div class="nav-label">6. Defense & Reporting</div>
-        <a href="<?= $base_path ?>modules/crypto/index.php" class="<?= strpos($uri, 'crypto') !== false ? 'active' : '' ?>">
-            🔐 Cryptography
-        </a>
-        <a href="<?= $base_path ?>modules/reporting/index.php" class="<?= strpos($uri, 'reporting') !== false ? 'active' : '' ?>">
-            📝 Reporting
-        </a>
+        <div style="padding-left: 1rem; font-size: 0.85rem;">
+             <a href="<?= $base_path ?>ssrf.php" style="border:none">• SSRF</a>
+             <a href="<?= $base_path ?>modules/reporting/index.php" style="border:none">• Reporting</a>
+        </div>
     </nav>
 
     <div class="sidebar-footer">
